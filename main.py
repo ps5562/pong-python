@@ -10,6 +10,7 @@ def main():
     screen = pygame.display.set_mode((800, 600))
     clock = pygame.time.Clock()
     font = pygame.font.Font(None, 36)
+    large_font = pygame.font.Font(None, 72)
 
     # Game objects using classes
     ball = Ball(400, 300)
@@ -23,27 +24,29 @@ def main():
                 pygame.quit()
                 sys.exit()
 
-        # Move the ball
-        ball.move()
+        # Only update game state if game is not over
+        if not game_controller.is_game_over():
+            # Move the ball
+            ball.move()
 
-        # Ball collision with paddles
-        if ball.rect.colliderect(player1.rect) or ball.rect.colliderect(player2.rect):
-            ball.speed_x *= -1
+            # Ball collision with paddles
+            if ball.rect.colliderect(player1.rect) or ball.rect.colliderect(player2.rect):
+                ball.speed_x *= -1
 
-        # Check for scoring
-        scorer = game_controller.check_score(ball)
-        if scorer != 0:
-            game_controller.reset_ball(ball)
+            # Check for scoring
+            scorer = game_controller.check_score(ball)
+            if scorer != 0:
+                game_controller.reset_ball(ball)
 
-        # Move player1 (human)
-        keys = pygame.key.get_pressed()
-        if keys[pygame.K_w]:
-            player1.move("up")
-        if keys[pygame.K_s]:
-            player1.move("down")
+            # Move player1 (human)
+            keys = pygame.key.get_pressed()
+            if keys[pygame.K_w]:
+                player1.move("up")
+            if keys[pygame.K_s]:
+                player1.move("down")
 
-        # Move player2 (AI)
-        ai_move(player2.rect, ball.rect)
+            # Move player2 (AI)
+            ai_move(player2.rect, ball.rect)
 
         # Draw everything
         screen.fill((0, 0, 0))
@@ -56,6 +59,20 @@ def main():
         score2_text = font.render(str(game_controller.player2_score), True, (255, 255, 255))
         screen.blit(score1_text, (100, 50))
         screen.blit(score2_text, (700, 50))
+        
+        # Draw game over message if game is over
+        if game_controller.is_game_over():
+            game_over_text = large_font.render("Game Over", True, (255, 255, 255))
+            game_over_rect = game_over_text.get_rect(center=(400, 250))
+            screen.blit(game_over_text, game_over_rect)
+            
+            winner = game_controller.get_winner()
+            if winner == 1:
+                winner_text = font.render("Player 1 Won!", True, (255, 255, 255))
+            else:
+                winner_text = font.render("Player 2 Won!", True, (255, 255, 255))
+            winner_rect = winner_text.get_rect(center=(400, 350))
+            screen.blit(winner_text, winner_rect)
         
         pygame.display.flip()
         clock.tick(60)
@@ -99,6 +116,22 @@ class GameController:
         ball.rect.center = (400, 300)
         ball.speed_x = 5
         ball.speed_y = 5
+    
+    def is_game_over(self):
+        """
+        Check if the game is over (first to 6 points).
+        """
+        return self.player1_score >= 6 or self.player2_score >= 6
+    
+    def get_winner(self):
+        """
+        Return the winner (1 or 2), or 0 if no winner yet.
+        """
+        if self.player1_score >= 6:
+            return 1
+        elif self.player2_score >= 6:
+            return 2
+        return 0
 
 # Paddle class
 class Paddle:
