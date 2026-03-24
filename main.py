@@ -21,7 +21,8 @@ def main():
     title_font = pygame.font.Font(None, 100)
 
     # Initialize game objects
-    game_state = "splash"
+    game_state = "splash"  # splash or playing
+    game_mode = "ai"  # "ai" by default"
     ball = Ball(400, 300)
     player1 = Paddle(50, 250)
     player2 = Paddle(740, 250)
@@ -34,18 +35,27 @@ def main():
             if event.type == pygame.QUIT:
                 running = False
             elif event.type == pygame.KEYDOWN:
-                if game_state == "splash" and event.key == pygame.K_SPACE:
-                    game_state = "playing"
-                    game_controller.reset_game()
-                    ball.reset()
-                elif game_state == "playing" and ((game_controller.is_game_over() and event.key == pygame.K_r) or
-                    event.key == pygame.K_ESCAPE):
-                    game_state = "splash"
+                if game_state == "splash":
+                    if event.key == pygame.K_1:
+                        game_mode = "ai"
+                    elif event.key == pygame.K_2:
+                        game_mode = "2player"
+                    elif event.key == pygame.K_SPACE:
+                        game_state = "playing"
+                        game_controller.reset_game()
+                        ball.reset()
+                elif game_state == "playing":
+                    if game_controller.is_game_over() and event.key == pygame.K_r:
+                        game_state = "splash"
+                        game_mode = None
+                    elif event.key == pygame.K_ESCAPE:
+                        game_state = "splash"
+                        game_mode = None
 
         # Update and render
         if game_state == "splash":
             screen.fill((0, 0, 0))
-            draw_splash_screen(screen, title_font, font)
+            draw_splash_screen(screen, title_font, font, game_mode=game_mode)
         elif game_state == "playing":
             if not game_controller.is_game_over():
                 ball.move()
@@ -62,7 +72,14 @@ def main():
                 if keys[pygame.K_s]:
                     player1.move("down")
 
-                ai_move(player2.rect, ball.rect)
+                # Player 2 control depends on game mode
+                if game_mode == "ai":
+                    ai_move(player2.rect, ball.rect)
+                else:  # 2player
+                    if keys[pygame.K_UP]:
+                        player2.move("up")
+                    if keys[pygame.K_DOWN]:
+                        player2.move("down")
 
             draw_game(screen, ball, player1, player2, game_controller, font, large_font)
 

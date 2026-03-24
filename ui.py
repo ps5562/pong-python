@@ -1,9 +1,11 @@
 import pygame
 
 
-def draw_splash_screen(screen, title_font, font):
+def draw_splash_screen(screen, title_font, font, game_mode=None):
     """
-    Draw the splash screen with a Pong-themed background and start option.
+    Draw the splash screen with a Pong-themed background and mode selection.
+    If game_mode is None, show mode selection screen.
+    If game_mode is set, show instructions for that mode.
     """
     # Create a gradient background (dark blue to black)
     for y in range(600):
@@ -23,23 +25,30 @@ def draw_splash_screen(screen, title_font, font):
     
     # Title
     title_text = title_font.render("PONG", True, (255, 255, 255))
-    title_rect = title_text.get_rect(center=(400, 150))
+    title_rect = title_text.get_rect(center=(400, 100))
     screen.blit(title_text, title_rect)
     
     # Subtitle
     subtitle_text = font.render("Classic Arcade Game", True, (200, 200, 200))
-    subtitle_rect = subtitle_text.get_rect(center=(400, 220))
+    subtitle_rect = subtitle_text.get_rect(center=(400, 150))
     screen.blit(subtitle_text, subtitle_rect)
     
-    # Start instruction
+    if game_mode == "ai":
+        instr_text = font.render("P1: W/S keys    P2: AI", True, (180, 180, 180))
+    else:  # 2player
+        instr_text = font.render("P1: W/S keys    P2: UP/DOWN arrows", True, (180, 180, 180))
+    instr_rect = instr_text.get_rect(center=(400, 200))
+    screen.blit(instr_text, instr_rect)
+
+    # Mode selection screen
+    mode_text = font.render("Select Game Mode (1 - AI, 2 - Two Player)", True, (255, 255, 100))
+    mode_rect = mode_text.get_rect(center=(400, 450))
+    screen.blit(mode_text, mode_rect)
+
+    # Game mode instructions
     start_text = font.render("Press SPACE to Play", True, (255, 255, 0))
     start_rect = start_text.get_rect(center=(400, 500))
     screen.blit(start_text, start_rect)
-    
-    # Instructions
-    instr_text = font.render("Player 1: W/S keys    Player 2: AI", True, (180, 180, 180))
-    instr_rect = instr_text.get_rect(center=(400, 550))
-    screen.blit(instr_text, instr_rect)
 
 
 def draw_game_over(screen, font, large_font, game_controller):
